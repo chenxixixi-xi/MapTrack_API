@@ -10,9 +10,11 @@ import android.app.Fragment;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -24,23 +26,25 @@ public class MainActivity extends FragmentActivity {
 
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 12;
     private FusedLocationProviderClient mFusedLocationProviderClient;//Save the instance
-    //Somewhere in Australia
-    private final LatLng mDestinationLatLng = new LatLng(-33.8523341, 151.2106085);
+    //Bascom Hall
+    private final LatLng mDestinationLatLng = new LatLng(43.07596898544946, -89.4043282665607);
     private GoogleMap mMap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Obtain a FusedLocationProviderClient
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map);
         mapFragment.getMapAsync(googleMap -> {
             mMap = googleMap;
             //code to display marker
             googleMap.addMarker(new MarkerOptions().position(mDestinationLatLng).title("Destination"));
-            displayMyLocation();
         });
-
-        //Obtain a FusedLocationProviderClient
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        displayMyLocation();
     }
 
     private void displayMyLocation() {
@@ -58,6 +62,9 @@ public class MainActivity extends FragmentActivity {
                 Location mLastKnownLocation = task.getResult();
                 if (task.isSuccessful() && mLastKnownLocation != null) {
                     mMap.addPolyline(new PolylineOptions().add(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), mDestinationLatLng));
+                    //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), 14.0f));
+                    // Display marker
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude())).title("Start"));
                 }
             });
         }
